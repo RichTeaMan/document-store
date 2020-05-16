@@ -1,0 +1,60 @@
+swagger: "2.0"
+info:
+  description: "Document Store API reference"
+  version: "1.0.0"
+  title: "Document Store"
+  termsOfService: "http://swagger.io/terms/"
+  contact:
+    email: "apiteam@swagger.io"
+  license:
+    name: "MIT"
+    url: "https://github.com/RichTeaMan/DocumentStore/blob/master/license.txt"
+basePath: "/"
+schemes:
+- "https"
+- "http"
+paths:
+  /document:
+    put:
+      summary: "Stores a document"
+      description: ""
+      operationId: "storeDocument"
+      consumes:
+      - "application/x-www-form-urlencoded"
+      produces:
+      - "application/json"
+      parameters:
+      - in: formData
+        name: "document"
+        type: "string"
+        description: "Document to store"
+        required: true
+      - in: formData
+        name: "key"
+        type: "string"
+        description: "Key to store document with"
+        required: false
+      responses:
+        200:
+          description: "OK"
+        409:
+          description: "Key conflict"
+    get:
+      summary: "Retrieves a stored a document"
+      description: ""
+      operationId: "retrieveDocument"
+      consumes:
+      - "application/x-www-form-urlencoded"
+      produces:
+      - "application/json"
+      parameters:
+      - in: query
+        name: "key"
+        type: "string"
+        description: "Key of document to retrieve"
+        required: true
+      responses:
+        200:
+          description: "OK"
+        404:
+          description: "Document not found"

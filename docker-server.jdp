@@ -1,0 +1,21 @@
+pipeline {
+    agent { label "linux" }
+    
+    parameters {
+        string(name: 'containerPort', description: 'Port of the Docker container.', defaultValue: '5003')
+    }
+    
+    stages {
+        stage('Build image') { 
+            steps {
+                sh "sudo docker build -t document-store ."
+            }
+        }
+        stage('Build run container') { 
+            steps {
+                sh (script: "sudo docker rm --force document-store", returnStatus: true)
+                sh "sudo docker run -d --name document-store -p ${params.containerPort}:5002 --restart unless-stopped document-store"
+            }
+        }
+    }
+}
