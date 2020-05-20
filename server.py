@@ -26,7 +26,11 @@ else:
 
 print('Database found.')
 
-class Scan(Resource):    
+class Home(Resource):
+    def get(self):
+        return 'Document store', 200
+
+class Store(Resource):
     def put(self):
         print('Document store requested.')
 
@@ -63,7 +67,8 @@ class Scan(Resource):
         else:
             return f"Document with key '{key}' not found.", 404
 
-api.add_resource(Scan, '/document') # Route_1
+api.add_resource(Home, '/')
+api.add_resource(Store, '/document')
 
 if __name__ == '__main__':
      app.run(host='0.0.0.0', port='5002')
