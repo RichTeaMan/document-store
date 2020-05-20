@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify
 from flask_restful import Resource, Api
 import couchdb
@@ -9,12 +10,21 @@ api = Api(app)
 
 databaseName = 'document'
 
-couchServer = couchdb.Server('http://192.168.1.228:5984')
+couchdb_address = os.getenv('DB_ADDRESS')
+if not couchdb_address:
+    couchdb_address = 'http://localhost:5984'
+
+print('Set environment variable DB_ADDRESS to change connection URL.')
+print(f'Establishing database connection at {couchdb_address}...')
+
+couchServer = couchdb.Server(couchdb_address)
 couchServer.resource.credentials = ("admin", "password")
 if databaseName in couchServer:
     db = couchServer[databaseName]
 else:
     db = couchServer.create(databaseName)
+
+print('Database found.')
 
 class Scan(Resource):    
     def put(self):
