@@ -6,22 +6,38 @@ from datetime import datetime
 
 app = Flask(__name__)
 api = Api(app)
-couch = couchdb.Server()
-couch.resource.credentials = ("admin", "password")
-db = couch['document']
+
+databaseName = 'document'
+
+couchServer = couchdb.Server('http://192.168.1.228:5984')
+couchServer.resource.credentials = ("admin", "password")
+if databaseName in couchServer:
+    db = couchServer[databaseName]
+else:
+    db = couchServer.create(databaseName)
 
 class Scan(Resource):    
     def put(self):
         print('Document store requested.')
-        document = request.files['document'].read()
+
+        # attempt different data fetch depending on headers
+        document = request.get_data()
+        # content_type: application/x-www-form-urlencoded
+        if not document:
+            document = list(request.form.keys())[0]
+        if not document:
+            return 'Document is empty', 400
         key = request.headers.get('key')
-        print (document)
-        row = { 'document': document, 'timestamp': datetime.now().isoformat() }
+        row = {
+            'document': document ,
+            'timestamp': datetime.now().isoformat()
+            }
         if key:
             row['_id'] = key
         try:
-            savedKey = db.save(row)
-            return savedKey['_id'], 200
+            savedRow = db.save(row)
+            savedKey = savedRow[0]
+            return { 'key': savedKey }, 200
         except couchdb.http.ResourceConflict as e:
             print(e)
             return 'key conflict', 409
