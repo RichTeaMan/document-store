@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify, make_response
 from flask_restful import Resource, Api
 import couchdb
 from json import dumps
-from datetime import datetime
+from datetime import datetime, timezone
 
 app = Flask(__name__)
 api = Api(app)
@@ -39,7 +39,7 @@ def saveDocument(key: str, document: str, headers):
 
     row = {
         'document': document ,
-        'timestamp': datetime.now().isoformat(),
+        'timestamp': datetime.now(timezone.utc).isoformat(),
         'headers': headers
     }
     if key:
