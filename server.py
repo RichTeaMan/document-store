@@ -9,7 +9,7 @@ from datetime import datetime
 app = Flask(__name__)
 api = Api(app)
 
-databaseName = 'document-proxy'
+databaseName = 'document-store'
 
 couchdb_address = os.getenv('DB_ADDRESS')
 if not couchdb_address:
