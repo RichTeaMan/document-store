@@ -15,11 +15,19 @@ couchdb_address = os.getenv('DB_ADDRESS')
 if not couchdb_address:
     couchdb_address = 'http://localhost:5984'
 
+couchdb_username = os.getenv('DB_USERNAME')
+if not couchdb_username:
+    couchdb_username = 'admin'
+
+couchdb_password = os.getenv('DB_PASSWORD')
+if not couchdb_password:
+    couchdb_password = 'password'
+
 print('Set environment variable DB_ADDRESS to change connection URL.')
 print(f'Establishing database connection at {couchdb_address}...')
 
 couchServer = couchdb.Server(couchdb_address)
-couchServer.resource.credentials = ("admin", "password")
+couchServer.resource.credentials = (couchdb_username, couchdb_password)
 if databaseName in couchServer:
     db = couchServer[databaseName]
 else:
