@@ -1,5 +1,6 @@
 import os
-from flask import Flask, request, jsonify
+import requests
+from flask import Flask, request, jsonify, make_response
 from flask_restful import Resource, Api
 import couchdb
 from json import dumps
@@ -8,7 +9,7 @@ from datetime import datetime
 app = Flask(__name__)
 api = Api(app)
 
-databaseName = 'document'
+databaseName = 'document-proxy'
 
 couchdb_address = os.getenv('DB_ADDRESS')
 if not couchdb_address:
@@ -26,6 +27,19 @@ else:
 
 print('Database found.')
 
+def saveDocument(key: str, document: str, headers):
+
+    row = {
+        'document': document ,
+        'timestamp': datetime.now().isoformat(),
+        'headers': headers
+    }
+    if key:
+        row['_id'] = key
+    savedRow = db.save(row)
+    savedKey = savedRow[0]
+    return savedKey
+
 class Home(Resource):
     def get(self):
         return 'Document store', 200
@@ -42,15 +56,8 @@ class Store(Resource):
         if not document:
             return 'Document is empty', 400
         key = request.headers.get('key')
-        row = {
-            'document': document ,
-            'timestamp': datetime.now().isoformat()
-            }
-        if key:
-            row['_id'] = key
         try:
-            savedRow = db.save(row)
-            savedKey = savedRow[0]
+            savedKey = saveDocument(key, document, {})
             return { 'key': savedKey }, 200
         except couchdb.http.ResourceConflict as e:
             print(e)
@@ -62,8 +69,33 @@ class Store(Resource):
         if not key:
             return 'A key query parameter must be specified', 400
         row = db.get(key)
+        if not row:
+            # page not found, go get it
+            response = requests.get(key)
+            if response.ok:
+                headerDict = {}
+                for h in response.headers:
+                    value = response.headers.get(h)
+                    headerDict[h] = value
+                try:
+                    saveDocument(key, response.text, headerDict)
+                except couchdb.http.ResourceConflict as e:
+                    # do nothing, just relaod from DB as normal
+                    print(e)
+                row = db.get(key)
+            else:
+                print(f"Error retrieving document '{key}', code {response.status_code}.")
+                return f"Error retrieving document '{key}'", response.status_code
+
         if row:
-            return row['document'], 200
+            contentType = row['headers'].get('Content-Type')
+            contentLength = row['headers'].get('Content-Length')
+            resp = make_response(row['document'], 200)
+            if contentType:
+                resp.headers['Content-Type'] = contentType
+            if contentLength:
+                resp.headers['Content-Length'] = contentLength
+            return resp
         else:
             return f"Document with key '{key}' not found.", 404
 

@@ -21,7 +21,7 @@ python server.py
 ### Document Store
 
 ```bash
-curl -X PUT http://localhost:5002/document -F "document=@filepath_to_store" -H 'key: document_key' -v
+curl -X PUT http://localhost:5002/document --data "document=@filepath_to_store" -H 'key: document_key' -v
 ```
 
 ### Document Retrieval
@@ -29,6 +29,10 @@ curl -X PUT http://localhost:5002/document -F "document=@filepath_to_store" -H '
 ```bash
 curl -X GET http://localhost:5002/document?key=document_key
 ```
+
+If the given document does not exist in the database it will be fetched, saved, then returned.
+
+The response will have the original content-type and content-length headers.
 
 ## Docker
 
