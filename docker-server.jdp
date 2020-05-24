@@ -1,10 +1,6 @@
 pipeline {
     agent { label "linux" }
     
-    parameters {
-        string(name: 'containerPort', description: 'Port of the Docker container.', defaultValue: '5003')
-    }
-    
     stages {
         stage('Build image') { 
             steps {
@@ -14,7 +10,9 @@ pipeline {
         stage('Build run container') { 
             steps {
                 sh (script: "sudo docker rm --force document-store", returnStatus: true)
-                sh "sudo docker run -d --name document-store -p ${params.containerPort}:5002 --restart unless-stopped document-store"
+                withCredentials([string(credentialsId: 'couchDbPassword', variable: 'password')]) {
+                    sh "sudo docker run -d --name document-store -p 5003:5002 -e DB_ADDRESS=http://localhost:5984 -e DB_USERNAME=admin -e DB_PASSWORD=${password} --restart unless-stopped document-store"
+                }
             }
         }
     }
