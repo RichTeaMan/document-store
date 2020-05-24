@@ -11,7 +11,7 @@ pipeline {
             steps {
                 sh (script: "sudo docker rm --force document-store", returnStatus: true)
                 withCredentials([string(credentialsId: 'couchDbPassword', variable: 'password')]) {
-                    sh "sudo docker run -d --name document-store -p 5003:5002 -e DB_ADDRESS=http://localhost:5984 -e DB_USERNAME=admin -e DB_PASSWORD=${password} --restart unless-stopped document-store"
+                    sh "sudo docker run -d --name document-store -p 5003:5002 -e DB_ADDRESS=http://tomserver:5984 -e DB_USERNAME=admin -e DB_PASSWORD=${password} --restart unless-stopped document-store"
                 }
             }
         }
