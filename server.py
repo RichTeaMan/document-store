@@ -63,6 +63,11 @@ class Store(Resource):
             document = list(request.form.keys())[0]
         if not document:
             return 'Document is empty', 400
+
+        if isinstance(document, bytes):
+            print('Converting document to str.')
+            document = document.decode("utf-8")
+
         key = request.headers.get('key')
         try:
             savedKey = saveDocument(key, document, {})
