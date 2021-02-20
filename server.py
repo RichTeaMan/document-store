@@ -102,12 +102,10 @@ class Store(Resource):
 
         if row:
             contentType = row['headers'].get('Content-Type')
-            contentLength = row['headers'].get('Content-Length')
+
             resp = make_response(row['document'], 200)
             if contentType:
                 resp.headers['Content-Type'] = contentType
-            if contentLength:
-                resp.headers['Content-Length'] = contentLength
             return resp
         else:
             return f"Document with key '{key}' not found.", 404
