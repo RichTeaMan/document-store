@@ -20,11 +20,11 @@ jobs:
       run: docker build --tag document-store .
 
     - name: Log into GitHub Container Registry
-      run: echo "${{ secrets.CR_PAT }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+      run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
     - name: Push image to GitHub Container Registry
       run: |
-        IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/document-store
+        IMAGE_ID=ghcr.io/${{ github.repository_owner }}/${{ github.repository }}
         # Change all uppercase to lowercase
         IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
         # Strip git ref prefix from version
